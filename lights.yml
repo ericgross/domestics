@@ -1,0 +1,40 @@
+---
+
+- hosts: all
+  become: yes
+  tasks:
+  - stat:
+      path: /opt/rpi_ws281x
+    register: pwm_library_exists
+
+  - name: Update all packages to the latest version
+    apt:
+      upgrade: dist
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: Install packages
+    apt:
+      name:
+        - build-essential
+        - git
+        - python-dev
+        - scons
+        - swig
+        - vim
+
+  - name: Clone Raspberry Pi PWM library for WS281X LEDs
+    git:
+      repo: 'https://github.com/jgarff/rpi_ws281x.git'
+      dest: /opt/rpi_ws281x
+    when: not pwm_library_exists
+
+  - name: Configure Neopixel support
+    shell: scons
+    args:
+      chdir: /opt/rpi_ws281x
+
+  - name: Install Neopixel Python module
+    shell: python setup.py install
+    args:
+      chdir: /opt/rpi_ws281x/python
