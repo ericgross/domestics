@@ -9,9 +9,13 @@ import atexit
 from neopixel import *
 import signal
 import sys
+import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+
+logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename="/tmp/pi_listener.log", level=logging.DEBUG)
 
 # LED strip configuration:
 LED_COUNT = 300      # Number of LED pixels.
@@ -27,24 +31,36 @@ LED_STRIP = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 
 app = Flask(__name__)
 strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
-animating = False
 
+animating = False
+shouldBeOn = True
+isOn = False
 def signal_handler(signal, frame):
     colorWipe(strip, Color(0, 0, 0))
     sys.exit(0)
 
 
 def print_date_time():
-    print time.strftime("%A, %d. %B %Y %I:%M:%S %p")
-    rainbow(strip)
+    global isOn
+    global shouldBeOn
 
+    # rainbow(strip)
+    if shouldBeOn and not isOn:
+        isOn = True
+        return white()
+
+    if not shouldBeOn and isOn:
+        isOn = False
+        return set_color(0,0,0)
+
+    logging.debug('Nothing to do')
 
 def configure_schedule():
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(
         func=print_date_time,
-        trigger=IntervalTrigger(seconds=20),
+        trigger=IntervalTrigger(seconds=10),
         id='printing_job',
         name='Print date and time every five seconds',
         replace_existing=True)
@@ -67,10 +83,10 @@ def rainbow(strip, wait_ms=40, iterations=1):
 
     """Draw rainbow that fades across all pixels at once."""
     if animating == True:
-        print 'Will not animate, already busy'
+        logging.debug('Will not animate, already busy')
         return
 
-    print 'Start animation'
+    logging.debug('Start animation')
     animating = True
     for j in range(256 * iterations):
         for i in range(strip.numPixels()):
@@ -78,14 +94,14 @@ def rainbow(strip, wait_ms=40, iterations=1):
         strip.show()
         time.sleep(wait_ms / 1000.0)
     animating = False
-    print 'Done animating'
+    logging.debug('Done animating')
 
 def light_up():
-    print 'starting lights'
+    logging.debug('starting lights')
     strip.begin()
 
 def set_color(color):
-    print 'going color'
+    logging.debug('going color')
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
@@ -93,11 +109,15 @@ def set_color(color):
 @app.route('/on')
 def on():
     set_color(Color(100,100,100))
+    global shouldBeOn
+    shouldBeOn = True
     return 'turned on'
 
 @app.route('/off')
 def off():
     set_color(Color(0,0,0))
+    global shouldBeOn
+    shouldBeOn = False
     return 'turned off'
 
 @app.route('/white')
@@ -117,6 +137,6 @@ def quit():
 if __name__ == '__main__':
     app.debug = True
     light_up()
-    white()
-    # configure_schedule()
+    # white()
+    configure_schedule()
     app.run(host='0.0.0.0')
