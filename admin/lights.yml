@@ -24,6 +24,7 @@
     git:
       repo: 'https://github.com/jgarff/rpi_ws281x.git'
       dest: /opt/rpi_ws281x
+      update: yes
 
   - name: Configure Neopixel support
     shell: scons
@@ -38,9 +39,12 @@
   - pip:
       name: Flask
 
+  - pip:
+      name: apscheduler
+
   - template:
       src: templates/pi_listener.j2
-      dest: /lib/systemd/system/pi_listener.service
+      dest: /lib/systemd/system/pi-listener.service
       owner: root
       group: root
       mode: 644
@@ -49,9 +53,10 @@
     git:
       repo: https://github.com/ericgross/domestics.git
       dest: /opt/domestics
+      update: yes
 
-  - name: Restart pi_listener
+  - name: Restart pi-listener
     systemd:
       state: restarted
-        daemon_reload: yes
-        name: pi_listener
+      daemon_reload: yes
+      name: pi-listener

@@ -1,10 +1,10 @@
 [Unit]
 Description=Raspberry Pi Flask Listener
-After=pi_listener.target
+After=pi-listener.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/python /opt/domestics/raspberries/python/flask_listener.py
+ExecStart=/usr/bin/python /opt/domestics/raspberries/python/flask_listener.py > /tmp/flask_listener.out 2> /tmp/flask_listener.err
 
 [Install]
-WantedBy=pi_listener.target
+WantedBy=pi-listener.target
