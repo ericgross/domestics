@@ -3,10 +3,6 @@
 - hosts: all
   become: yes
   tasks:
-  - stat:
-      path: /opt/rpi_ws281x
-    register: pwm_library_exists
-
   - name: Update all packages to the latest version
     apt:
       upgrade: dist
@@ -19,6 +15,7 @@
         - build-essential
         - git
         - python-dev
+        - python-pip
         - scons
         - swig
         - vim
@@ -27,7 +24,8 @@
     git:
       repo: 'https://github.com/jgarff/rpi_ws281x.git'
       dest: /opt/rpi_ws281x
-    when: not pwm_library_exists
+    args:
+      creates: /opt/rpi_ws281x
 
   - name: Configure Neopixel support
     shell: scons
@@ -38,3 +36,20 @@
     shell: python setup.py install
     args:
       chdir: /opt/rpi_ws281x/python
+
+  - pip:
+      name: Flask
+
+  - template:
+      src: templates/pi_listener.j2
+      dest: /lib/systemd/system/pi_listener.service
+      owner: root
+      group: root
+      mode: 644
+
+  - name: Clone domestics
+    git:
+      repo: https://github.com/ericgross/domestics.git
+      dest: /opt/domestics
+    args:
+      creates: /opt/domestics
