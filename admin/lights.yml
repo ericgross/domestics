@@ -64,9 +64,11 @@
       state: restarted
       daemon_reload: yes
       name: pi-file-listener
+      enabled: true
 
   - name: Restart pi-web-listener
     systemd:
       state: restarted
       daemon_reload: yes
       name: pi-web-listener
+      enabled: true

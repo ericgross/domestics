@@ -77,15 +77,15 @@ class LightRunner(object):
         """ Method that runs forever """
         while True:
             # Do something
-            print('Doing something imporant in the background')
+            logging.debug('Doing something imporant in the background')
 
             if be_on:
               #time.sleep(self.interval)
               #lights = Lights()
-              print 'Should be on ..'
+              logging.debug('Should be on ..')
               lights.theaterChaseRainbow()
             else:
-              print 'Should be off..'
+              logging.debug('Should be off..')
 
 class Watcher:
     DIRECTORY_TO_WATCH = "/tmp/lights"
@@ -99,11 +99,11 @@ class Watcher:
         self.observer.start()
         try:
             while True:
-                print 'time!'
+                logging.debug('time!')
                 time.sleep(5)
         except:
             self.observer.stop()
-            print "Error"
+            logging.debug("Error")
 
         self.observer.join()
 
@@ -119,16 +119,16 @@ class Handler(FileSystemEventHandler):
 
         elif event.event_type == 'created':
             # Take any action here when a file is first created.
-            print "Received created event - %s." % event.src_path
+            logging.debug("Received created event - %s." % event.src_path)
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
-            print "Received modified event - %s." % event.src_path
+            logging.debug("Received modified event - %s." % event.src_path)
             if event.src_path == '/tmp/lights/on':
-              print 'Should turn on'
+              logging.debug('Should turn on')
               be_on = True
             if event.src_path == '/tmp/lights/off':
-              print 'Should turn off'
+              logging.debug('Should turn off')
               be_on = False
 
 lights = Lights()
