@@ -39,9 +39,6 @@
   - pip:
       name: Flask
 
-  - pip:
-      name: apscheduler
-
   - template:
       src: templates/pi_listener.j2
       dest: /lib/systemd/system/pi-listener.service
