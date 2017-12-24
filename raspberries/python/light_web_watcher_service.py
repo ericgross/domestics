@@ -30,6 +30,16 @@ def off():
     if write_file('off'):
       return 'turned off'
 
+@app.route('/solid')
+def solid():
+    if write_file('solid'):
+        return 'solid'
+
+@app.route('/rainbow')
+def rainbow():
+    if write_file('rainbow'):
+        return 'rainbow'
+
 if __name__ == '__main__':
     app.debug = True
 

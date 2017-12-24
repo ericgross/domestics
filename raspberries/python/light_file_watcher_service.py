@@ -28,6 +28,7 @@ LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 
 be_on = True
+be_rainbow = True
 
 class Lights:
   def __init__(self):
@@ -44,6 +45,15 @@ class Lights:
         time.sleep(wait_ms/1000.0)
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, 0)
+
+  def off(self):
+    set_color(Color(0,0,0))
+
+  def set_color(color):
+    logging.debug('going color')
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, color)
+        strip.show()
 
   def wheel(self, pos):
     """Generate rainbow colors across 0-255 positions."""
@@ -73,19 +83,25 @@ class LightRunner(object):
         thread.daemon = True                            # Daemonize thread
         thread.start()                                  # Start the execution
 
+    def show_display(self):
+      logging.debug('Should be on ..')
+      if be_rainbow:
+        lights.theaterChaseRainbow()
+      else:
+        lights.set_color(Color(30,80,100)
+
     def run(self):
         """ Method that runs forever """
         while True:
             # Do something
+            time.sleep(1)
             logging.debug('Doing something imporant in the background')
 
             if be_on:
-              #time.sleep(self.interval)
-              #lights = Lights()
-              logging.debug('Should be on ..')
-              lights.theaterChaseRainbow()
+              show_display()
             else:
               logging.debug('Should be off..')
+              lights.off()
 
 class Watcher:
     DIRECTORY_TO_WATCH = "/tmp/lights"
@@ -113,6 +129,7 @@ class Handler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
         global be_on
+        global be_rainbow
 
         if event.is_directory:
             return None
@@ -130,6 +147,12 @@ class Handler(FileSystemEventHandler):
             if event.src_path == '/tmp/lights/off':
               logging.debug('Should turn off')
               be_on = False
+            if event.src_path == '/tmp/lights/rainbow':
+              logging.debug('Should be rainbow')
+              be_rainbow = True
+            if event.src_path == '/tmp/lights/solid':
+              logging.debug('Should be solid')
+              be_rainbow = False
 
 lights = Lights()
 example = LightRunner()
