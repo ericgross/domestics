@@ -40,8 +40,15 @@
       name: Flask
 
   - template:
-      src: templates/pi_listener.j2
-      dest: /lib/systemd/system/pi-listener.service
+      src: templates/pi_web_listener.j2
+      dest: /lib/systemd/system/pi-web-listener.service
+      owner: root
+      group: root
+      mode: 644
+
+  - template:
+      src: templates/pi_file_listener.j2
+      dest: /lib/systemd/system/pi-file-listener.service
       owner: root
       group: root
       mode: 644
@@ -52,8 +59,14 @@
       dest: /opt/domestics
       update: yes
 
-  - name: Restart pi-listener
+  - name: Restart pi-file-listener
     systemd:
       state: restarted
       daemon_reload: yes
-      name: pi-listener
+      name: pi-file-listener
+
+  - name: Restart pi-web-listener
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: pi-web-listener
