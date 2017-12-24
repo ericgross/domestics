@@ -47,13 +47,13 @@ class Lights:
           self.strip.setPixelColor(i+q, 0)
 
   def off(self):
-    set_color(Color(0,0,0))
+    self.set_color(Color(0,0,0))
 
-  def set_color(color):
+  def set_color(self, color):
     logging.debug('going color')
-    for i in range(strip.numPixels()):
-        strip.setPixelColor(i, color)
-        strip.show()
+    for i in range(self.strip.numPixels()):
+        self.strip.setPixelColor(i, color)
+        self.strip.show()
 
   def wheel(self, pos):
     """Generate rainbow colors across 0-255 positions."""
@@ -86,9 +86,11 @@ class LightRunner(object):
     def show_display(self):
       logging.debug('Should be on ..')
       if be_rainbow:
+        logging.debug('Should be rainbow')
         lights.theaterChaseRainbow()
       else:
-        lights.set_color(Color(30,80,100)
+        logging.debug('Should be solid')
+        lights.set_color(Color(30,80,100))
 
     def run(self):
         """ Method that runs forever """
@@ -98,7 +100,7 @@ class LightRunner(object):
             logging.debug('Doing something imporant in the background')
 
             if be_on:
-              show_display()
+              self.show_display()
             else:
               logging.debug('Should be off..')
               lights.off()
