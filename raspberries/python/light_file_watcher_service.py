@@ -79,7 +79,7 @@ class LightRunner(object):
             # Do something
             print('Doing something imporant in the background')
 
-      if be_on:
+            if be_on:
               #time.sleep(self.interval)
               #lights = Lights()
               print 'Should be on ..'
