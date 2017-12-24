@@ -37,7 +37,7 @@ class Lights:
 
   def theaterChaseRainbow(self, wait_ms=1):
     """Rainbow movie theater light style chaser animation."""
-    for j in range(6):
+    for j in range(256):
       for q in range(3):
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, self.wheel((i+j) % 255))
