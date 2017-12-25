@@ -60,7 +60,7 @@ class Lights:
     """Draw rainbow that fades across all pixels at once."""
     for j in range(256*iterations):
       for i in range(self.strip.numPixels()):
-        if effect != 'rainbow':
+        if not be_on or effect != 'rainbow':
           return
         self.strip.setPixelColor(i, self.wheel((i+j) & 255))
       self.strip.show()
@@ -70,7 +70,7 @@ class Lights:
     """Draw rainbow that uniformly distributes itself across all pixels."""
     for j in range(256*iterations):
       for i in range(self.strip.numPixels()):
-        if effect != 'rainbow_cycle':
+        if not be_on or effect != 'rainbow_cycle':
           return
         self.strip.setPixelColor(i, self.wheel((int(i * 256 / self.strip.numPixels()) + j) & 255))
       self.strip.show()
