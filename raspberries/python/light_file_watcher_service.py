@@ -111,13 +111,13 @@ class Lights:
   def wheel(self, pos):
     """Generate rainbow colors across 0-255 positions."""
     if pos < 85:
-      return Color(self.with_brightness(pos * 3), self.with_brightness(255 - pos * 3), 0)
+      return Color(self.with_brightness(red * pos * 3), self.with_brightness(green * 255 - pos * 3), 0)
     elif pos < 170:
       pos -= 85
-      return Color(self.with_brightness(255 - pos * 3), 0, self.with_brightness(pos * 3))
+      return Color(self.with_brightness(red * 255 - pos * 3), 0, self.with_brightness(blue * pos * 3))
     else:
       pos -= 170
-      return Color(0, self.with_brightness(pos * 3), self.with_brightness(255 - pos * 3))
+      return Color(0, self.with_brightness(green * pos * 3), self.with_brightness(blue * 255 - pos * 3))
 
 class LightRunner(object):
     """ Threading example class
