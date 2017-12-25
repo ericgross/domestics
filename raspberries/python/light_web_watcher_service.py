@@ -40,6 +40,16 @@ def rainbow():
     if write_file('rainbow'):
         return 'rainbow'
 
+@app.route('/brighter')
+def brighter():
+    if write_file('brighter'):
+        return 'brighter'
+
+@app.route('/dimmer')
+def dimmer():
+    if write_file('dimmer'):
+        return 'dimmer'
+
 if __name__ == '__main__':
     app.debug = True
 

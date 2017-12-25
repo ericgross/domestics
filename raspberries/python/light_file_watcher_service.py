@@ -29,6 +29,7 @@ LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 
 be_on = True
 be_rainbow = True
+brightness = 1
 
 class Lights:
   def __init__(self):
@@ -38,6 +39,8 @@ class Lights:
   def theaterChaseRainbow(self, wait_ms=1):
     """Rainbow movie theater light style chaser animation."""
     for j in range(256):
+      if not be_on or not be_rainbow:
+        return
       for q in range(3):
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, self.wheel((i+j) % 255))
@@ -53,7 +56,7 @@ class Lights:
     logging.debug('going color')
     for i in range(self.strip.numPixels()):
         self.strip.setPixelColor(i, color)
-        self.strip.show()
+    self.strip.show()
 
   def wheel(self, pos):
     """Generate rainbow colors across 0-255 positions."""
@@ -83,14 +86,14 @@ class LightRunner(object):
         thread.daemon = True                            # Daemonize thread
         thread.start()                                  # Start the execution
 
-    def show_display(self):
-      logging.debug('Should be on ..')
+    def show_on(self):
+      logging.debug('Should be on with brightness ' + str(brightness))
       if be_rainbow:
         logging.debug('Should be rainbow')
         lights.theaterChaseRainbow()
       else:
         logging.debug('Should be solid')
-        lights.set_color(Color(30,80,100))
+        lights.set_color(Color(int(30 * brightness),int(80 * brightness),int(100 * brightness)))
 
     def run(self):
         """ Method that runs forever """
@@ -100,7 +103,7 @@ class LightRunner(object):
             logging.debug('Doing something imporant in the background')
 
             if be_on:
-              self.show_display()
+              self.show_on()
             else:
               logging.debug('Should be off..')
               lights.off()
@@ -118,7 +121,7 @@ class Watcher:
         try:
             while True:
                 logging.debug('time!')
-                time.sleep(5)
+                time.sleep(1)
         except:
             self.observer.stop()
             logging.debug("Error")
@@ -132,6 +135,7 @@ class Handler(FileSystemEventHandler):
     def on_any_event(event):
         global be_on
         global be_rainbow
+        global brightness
 
         if event.is_directory:
             return None
@@ -155,9 +159,22 @@ class Handler(FileSystemEventHandler):
             if event.src_path == '/tmp/lights/solid':
               logging.debug('Should be solid')
               be_rainbow = False
+            if event.src_path == '/tmp/lights/brighter':
+              logging.debug('Should be brighter')
+              brightness = brightness + .1
+            if event.src_path == '/tmp/lights/dimmer':
+              logging.debug('Should be dimmer')
+              brightness = brightness - .1
+
+
+def subscriber(sender):
+    print("Got a signal sent by %r" % sender)
 
 lights = Lights()
 example = LightRunner()
 
+#example.run()
+
 w = Watcher()
 w.run()
+
