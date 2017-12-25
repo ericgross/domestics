@@ -41,6 +41,7 @@ class Lights:
     for j in range(256):
       if not be_on or not be_rainbow:
         return
+      logging.debug('Showing rainbow with brightness ' + str(brightness))
       for q in range(3):
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, self.wheel((i+j) % 255))
@@ -58,16 +59,22 @@ class Lights:
         self.strip.setPixelColor(i, color)
     self.strip.show()
 
+  def with_brightness(self, input):
+      result = int(input * brightness)
+      if result < 0:
+          return 0
+      return result
+
   def wheel(self, pos):
     """Generate rainbow colors across 0-255 positions."""
     if pos < 85:
-      return Color(pos * 3, 255 - pos * 3, 0)
+      return Color(self.with_brightness(pos * 3), self.with_brightness(255 - pos * 3), 0)
     elif pos < 170:
       pos -= 85
-      return Color(255 - pos * 3, 0, pos * 3)
+      return Color(self.with_brightness(255 - pos * 3), 0, self.with_brightness(pos * 3))
     else:
       pos -= 170
-      return Color(0, pos * 3, 255 - pos * 3)
+      return Color(0, self.with_brightness(pos * 3), self.with_brightness(255 - pos * 3))
 
 class LightRunner(object):
     """ Threading example class
@@ -150,6 +157,7 @@ class Handler(FileSystemEventHandler):
             if event.src_path == '/tmp/lights/on':
               logging.debug('Should turn on')
               be_on = True
+              brightness = 1
             if event.src_path == '/tmp/lights/off':
               logging.debug('Should turn off')
               be_on = False
