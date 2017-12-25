@@ -50,6 +50,12 @@ def dimmer():
     if write_file('dimmer'):
         return 'dimmer'
 
+@app.route('/custom')
+def custom():
+    command = request.args.get('command')
+    if write_file(command):
+        return 'wrote custom command: ' + command
+
 if __name__ == '__main__':
     app.debug = True
 
