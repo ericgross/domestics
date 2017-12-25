@@ -33,6 +33,7 @@ brightness = 1
 red = 1
 green = 1
 blue = 1
+speed = 1
 
 class Lights:
   def __init__(self):
@@ -56,7 +57,7 @@ class Lights:
         logging.debug('Should be solid: ' + str(brightness) + ': [' + str(red_total) + ',' + str(green_total) + ',' + str(blue_total) + ']')
         lights.set_color(Color(red_total,green_total,blue_total))
 
-  def rainbow(self, wait_ms=20, iterations=1):
+  def rainbow(self, wait_ms=1, iterations=1):
     """Draw rainbow that fades across all pixels at once."""
     for j in range(256*iterations):
       for i in range(self.strip.numPixels()):
@@ -64,9 +65,9 @@ class Lights:
           return
         self.strip.setPixelColor(i, self.wheel((i+j) & 255))
       self.strip.show()
-      time.sleep(wait_ms/1000.0)
+      time.sleep(self.sleep_time(wait_ms))
 
-  def rainbowCycle(self, wait_ms=20, iterations=5):
+  def rainbowCycle(self, wait_ms=1, iterations=5):
     """Draw rainbow that uniformly distributes itself across all pixels."""
     for j in range(256*iterations):
       for i in range(self.strip.numPixels()):
@@ -74,22 +75,28 @@ class Lights:
           return
         self.strip.setPixelColor(i, self.wheel((int(i * 256 / self.strip.numPixels()) + j) & 255))
       self.strip.show()
-      time.sleep(wait_ms/1000.0)
+      time.sleep(self.sleep_time(wait_ms))
 
   def theaterChaseRainbow(self, wait_ms=1):
     """Rainbow movie theater light style chaser animation."""
     for j in range(256):
       if not be_on or effect != 'chase':
         return
-      logging.debug('Showing rainbow with brightness ' + str(brightness))
+      logging.debug('Showing rainbow with brightness ' + str(brightness) + ', sleep_time: ' + str(self.sleep_time(wait_ms)))
       for q in range(3):
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, self.wheel((i+j) % 255))
         self.strip.show()
-        time.sleep(wait_ms/1000.0)
+        time.sleep(self.sleep_time())
         for i in range(0, self.strip.numPixels(), 3):
           self.strip.setPixelColor(i+q, 0)
 
+  def sleep_time(self, wait_ms = 1):
+    result = (1000 * (1-speed)) * wait_ms / 1000.0
+    if result < 0:
+        return 0
+    return result
+    
   def off(self):
     self.set_color(Color(0,0,0))
 
@@ -184,6 +191,7 @@ class Handler(FileSystemEventHandler):
         global red
         global green
         global blue
+        global speed
 
         if event.is_directory:
             return None
@@ -241,6 +249,10 @@ class Handler(FileSystemEventHandler):
             elif event_name == 'green_less':
               if green > 0:
                 green = green - .1
+            elif event_name == 'faster':
+              speed = speed + .1
+            elif event_name == 'slower':
+              speed = speed - .1
 
 
 def subscriber(sender):
