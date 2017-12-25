@@ -30,6 +30,9 @@ LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 be_on = True
 effect = 'rainbow'
 brightness = 1
+red = 1
+green = 1
+blue = 1
 
 class Lights:
   def __init__(self):
@@ -37,6 +40,7 @@ class Lights:
     self.strip.begin()
 
   def animate(self):
+      logging.debug('animate ...')
       if effect == 'rainbow':
         logging.debug('Should be rainbow')
         lights.rainbow()
@@ -46,8 +50,11 @@ class Lights:
       elif effect == 'rainbow_cycle':
         lights.rainbowCycle()
       elif effect == 'solid':
-        logging.debug('Should be solid')
-        lights.set_color(Color(int(30 * brightness),int(80 * brightness),int(100 * brightness)))
+        red_total = max([0, int(255 * red * brightness)])
+        green_total = max([0, int(255 * green * brightness)])
+        blue_total = max([0, int(255 * blue * brightness)])
+        logging.debug('Should be solid: ' + str(brightness) + ': [' + str(red_total) + ',' + str(green_total) + ',' + str(blue_total) + ']')
+        lights.set_color(Color(red_total,green_total,blue_total))
 
   def rainbow(self, wait_ms=20, iterations=1):
     """Draw rainbow that fades across all pixels at once."""
@@ -93,6 +100,9 @@ class Lights:
     self.strip.show()
 
   def with_brightness(self, input):
+      if brightness <= 0:
+          return 0
+
       result = int(input * brightness)
       if result < 0:
           return 0
@@ -171,6 +181,9 @@ class Handler(FileSystemEventHandler):
         global be_on
         global effect
         global brightness
+        global red
+        global green
+        global blue
 
         if event.is_directory:
             return None
@@ -204,10 +217,30 @@ class Handler(FileSystemEventHandler):
               effect = 'chase'
             elif event_name == 'brighter':
               logging.debug('Should be brighter')
-              brightness = brightness + .1
+              if brightness < 1:
+                brightness = brightness + .1
             elif event_name == 'dimmer':
               logging.debug('Should be dimmer: ' + str(brightness))
-              brightness = brightness - .1
+              if brightness > 0:
+                brightness = brightness - .1
+            elif event_name == 'red_more':
+              if red < 1:
+                red = red + .1
+            elif event_name == 'red_less':
+              if red > 0:
+                red = red - .1
+            elif event_name == 'blue_more':
+              if blue < 1:
+                blue = blue + .1
+            elif event_name == 'blue_less':
+              if blue > 0:
+                blue = blue - .1
+            elif event_name == 'green_more':
+              if green < 1:
+                green = green + .1
+            elif event_name == 'green_less':
+              if green > 0:
+                green = green - .1
 
 
 def subscriber(sender):
