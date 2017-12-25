@@ -1,13 +1,13 @@
 ---
 
 - hosts: all
-  become: yes
   tasks:
   - name: Update all packages to the latest version
     apt:
       upgrade: dist
       update_cache: yes
       cache_valid_time: 3600
+    become: yes
 
   - name: Install packages
     apt:
@@ -19,6 +19,16 @@
         - scons
         - swig
         - vim
+    become: yes
+
+  - name: Create RPi PWM library directory
+    file:
+      path: /opt/rpi_ws281x
+      state: directory
+      owner: pi
+      group: pi
+      mode: 0775
+    become: yes
 
   - name: Clone Raspberry Pi PWM library for WS281X LEDs
     git:
@@ -30,14 +40,21 @@
     shell: scons
     args:
       chdir: /opt/rpi_ws281x
+    become: yes
 
   - name: Install Neopixel Python module
     shell: python setup.py install
     args:
       chdir: /opt/rpi_ws281x/python
+    become: yes
 
   - pip:
       name: Flask
+    become: yes
+
+  - pip:
+      name: watchdog
+    become: yes
 
   - template:
       src: templates/pi_web_listener.j2
@@ -53,9 +70,18 @@
       group: root
       mode: 644
 
+  - name: Create domestics directory
+    file:
+      path: /opt/domestics
+      state: directory
+      owner: pi
+      group: pi
+      mode: 0775
+    become: yes
+
   - name: Clone domestics
     git:
-      repo: https://github.com/ericgross/domestics.git
+      repo: git@github.com:ericgross/domestics.git
       dest: /opt/domestics
       update: yes
 
@@ -65,6 +91,7 @@
       daemon_reload: yes
       name: pi-file-listener
       enabled: true
+    become: yes
 
   - name: Restart pi-web-listener
     systemd:
@@ -72,3 +99,4 @@
       daemon_reload: yes
       name: pi-web-listener
       enabled: true
+    become: yes
